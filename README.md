@@ -7,6 +7,7 @@ Web-App (PWA) zum Tracken von **Krafttraining** (Gewicht × Wiederholungen) und 
 - **Kraft** – Übung per Chip wählen, Gewicht & Wiederholungen mit +/- eingeben, Satz speichern. Letzte Werte werden vorausgefüllt, das letzte Training wird angezeigt, Rekorde werden gefeiert. Liste aller Übungen mit Mini-Verlauf.
 - **Übungsdetail** – Diagramm für Max. Gewicht, geschätztes 1RM, Volumen oder Wiederholungen, Zeitraum 1 Monat bis alles, Bestwert, Entwicklung in %, alle Einheiten.
 - **Laufen** – Distanz und Zeit eingeben, Pace (min/km) und km/h werden live berechnet. Diagramm für Pace, Distanz oder Tempo, Kilometer pro Woche, Liste aller Läufe.
+- **Laufziel & Plan** – Ziel festlegen (5 km, 10 km, Halbmarathon, Marathon oder eigene Distanz, optional mit Zielzeit und Termin). Die App berechnet deine aktuelle Form (Riegel-Formel aus deinen schnellsten Läufen der letzten 6 Wochen), zeigt den Formverlauf und eine Prognose bis zum Zieltag, Prognosen für alle Standarddistanzen, persönliche Trainingstempos und einen Wochenplan, der sich jede Woche an deine Läufe anpasst (Grundlage → Aufbau → Zielspezifisch → Tapering, Erholungswochen, +10 %-Regel). Dazu Hinweise aus deinen Daten.
 - **Verlauf** – alle Trainingstage nach Monaten, filterbar nach Kraft/Laufen.
 - **Einstellungen** – Hell/Dunkel/Automatisch, Übungen verwalten, Export/Import als JSON.
 
