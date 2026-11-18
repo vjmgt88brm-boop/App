@@ -1,23 +1,23 @@
 # Trainingslog
 
-Eine einfache Web-App (PWA) zum Tracken von Kraftübungen mit Gewicht und Wiederholungen – inkl. Fortschrittsdiagramm.
+Web-App (PWA) zum Tracken von **Krafttraining** (Gewicht × Wiederholungen) und **Läufen** (Distanz, Zeit, Pace) – mit Übersicht, Trainingskalender, Diagrammen und Bestleistungen. Keine Abhängigkeiten, kein Build, funktioniert offline.
 
-## Funktionen
-- **Training**: Übung wählen, Gewicht & Wiederholungen eingeben (mit +/- Tasten), Satz speichern. Werte vom letzten Satz werden vorausgefüllt, das letzte Training der Übung wird angezeigt. Neue Bestleistungen werden gemeldet.
-- **Laufen**: Läufe mit Distanz und Zeit erfassen, Pace (min/km) und km/h werden automatisch berechnet. Diagramm für Pace, Distanz oder Geschwindigkeit, Kennzahlen Gesamt-km, beste Pace, längster Lauf.
-- **Verlauf**: Alle Trainingstage (Kraft und Läufe) mit Übungen und Sätzen; vergangene Tage lassen sich bearbeiten.
-- **Fortschritt**: Liniendiagramm pro Übung über die Zeit – Max. Gewicht, geschätztes 1RM (Epley), Volumen oder Max. Wiederholungen; Zeitraum 4 Wochen bis alles. Kennzahlen: Bestwert, Entwicklung in %, Anzahl Einheiten. Tabellenansicht.
-- **Übungen**: Übungen anlegen, umbenennen, löschen. Export/Import der Daten als JSON.
-- Dark Mode, offline-fähig, auf dem Handy zum Startbildschirm hinzufügbar.
+## Bereiche
+- **Übersicht** – Wochenbilanz mit Trainingstagen, bewegtem Gewicht und Laufkilometern, Wochenleiste (Mo–So), Serie aktiver Wochen, Trainingskalender der letzten Monate, Entwicklung der letzten 8 Wochen und neue Bestleistungen.
+- **Kraft** – Übung per Chip wählen, Gewicht & Wiederholungen mit +/- eingeben, Satz speichern. Letzte Werte werden vorausgefüllt, das letzte Training wird angezeigt, Rekorde werden gefeiert. Liste aller Übungen mit Mini-Verlauf.
+- **Übungsdetail** – Diagramm für Max. Gewicht, geschätztes 1RM, Volumen oder Wiederholungen, Zeitraum 1 Monat bis alles, Bestwert, Entwicklung in %, alle Einheiten.
+- **Laufen** – Distanz und Zeit eingeben, Pace (min/km) und km/h werden live berechnet. Diagramm für Pace, Distanz oder Tempo, Kilometer pro Woche, Liste aller Läufe.
+- **Verlauf** – alle Trainingstage nach Monaten, filterbar nach Kraft/Laufen.
+- **Einstellungen** – Hell/Dunkel/Automatisch, Übungen verwalten, Export/Import als JSON.
 
-Die Daten werden lokal im Browser (localStorage) gespeichert – regelmäßig exportieren!
+Farben: **Kraft = Blau**, **Laufen = Orange** – überall gleich.
+
+Die Daten werden lokal im Browser gespeichert (localStorage) – regelmäßig exportieren!
 
 ## Starten
-Keine Abhängigkeiten, kein Build. Lokal z. B.:
-
 ```bash
 python3 -m http.server 8000
 # dann http://localhost:8000 öffnen
 ```
 
-Zum Nutzen auf dem Handy: Repository über **GitHub Pages** veröffentlichen (Settings → Pages → Branch wählen), Seite im Handy-Browser öffnen und „Zum Home-Bildschirm“ wählen.
+Veröffentlicht über GitHub Pages: im Handy-Browser öffnen und „Zum Home-Bildschirm“ wählen.

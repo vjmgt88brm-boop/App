@@ -3,184 +3,145 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#2a78d6">
+  <meta name="theme-color" content="#f4f4f1" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d0d0c" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Trainingslog">
+  <meta name="description" content="Krafttraining und Läufe tracken – mit Fortschritt, Kalender und Bestleistungen.">
   <title>Trainingslog</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon-180.png">
   <link rel="stylesheet" href="style.css">
+  <script>try{var t=localStorage.getItem('trainingslog.theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 </head>
 <body>
-  <header class="topbar">
-    <h1 id="view-title">Training</h1>
+  <!-- Icons -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10.5a1 1 0 0 0 1 1H10v-5.5h4v5.5h3.5a1 1 0 0 0 1-1V9"/></symbol>
+    <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></symbol>
+    <symbol id="i-run" viewBox="0 0 24 24"><circle cx="14.5" cy="4.5" r="1.9"/><path d="M8 21l3-6 3 2.2V22M5.5 11.5 9 8.2h4.2l2 3.8 3.3 1M11 15l1.3-6"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h3M13 17h7"/><circle cx="16" cy="7" r="2.5"/><circle cx="10" cy="17" r="2.5"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 5.5 16 12l-6.5 6.5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7.5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.9 12.2a1 1 0 0 0 1 .8h7.2a1 1 0 0 0 1-.8L17.5 7"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5.5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5.5a2.5 2.5 0 0 0 2.6 4M16 6h2.5a2.5 2.5 0 0 1-2.6 4M12 13.5V17M8.5 20.5h7M10 17h4v3.5h-4z"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 21c3.9 0 6.5-2.6 6.5-6.2 0-3.4-2.3-5.4-3.7-7.8-.5 2-1.6 3.1-2.7 3.6.1-2.8-1.2-5.5-3.6-7.1.3 3.3-1.8 5.2-3.1 7.1-.8 1.2-1.3 2.6-1.3 4.2C4.1 18.4 7.6 21 12 21z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 20V9M7 13.5l5-5 5 5M5 4h14"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M6 16l4-5 3.5 3L19 7"/></symbol>
+  </svg>
+
+  <header class="topbar" id="topbar">
+    <button type="button" class="icon-btn" id="btn-back" aria-label="Zurück" hidden><svg class="i" aria-hidden="true"><use href="#i-back"/></svg></button>
+    <div class="titles">
+      <p class="overline" id="overline"></p>
+      <h1 id="title">Übersicht</h1>
+    </div>
+    <a class="icon-btn" id="btn-settings" href="#/einstellungen" aria-label="Einstellungen"><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg></a>
   </header>
 
   <main>
-    <!-- TRAINING -->
-    <section id="view-log" class="view active" aria-label="Training erfassen">
-      <form id="log-form" class="card" autocomplete="off">
-        <div class="row">
-          <label class="field grow">
-            <span>Übung</span>
-            <select id="log-exercise" required></select>
-          </label>
-          <label class="field">
-            <span>Datum</span>
-            <input type="date" id="log-date" required>
-          </label>
-        </div>
-        <p id="log-hint" class="hint"></p>
-        <div class="row">
-          <div class="field grow">
-            <span>Gewicht (kg)</span>
-            <div class="stepper">
-              <button type="button" data-step="weight" data-delta="-2.5" aria-label="Gewicht verringern">−</button>
-              <input type="text" id="log-weight" inputmode="decimal" required>
-              <button type="button" data-step="weight" data-delta="2.5" aria-label="Gewicht erhöhen">+</button>
-            </div>
-          </div>
-          <div class="field grow">
-            <span>Wiederholungen</span>
-            <div class="stepper">
-              <button type="button" data-step="reps" data-delta="-1" aria-label="Wiederholungen verringern">−</button>
-              <input type="number" id="log-reps" inputmode="numeric" step="1" min="1" required>
-              <button type="button" data-step="reps" data-delta="1" aria-label="Wiederholungen erhöhen">+</button>
-            </div>
-          </div>
-        </div>
-        <button type="submit" class="primary">Satz speichern</button>
-      </form>
+    <!-- ÜBERSICHT -->
+    <section class="view" id="view-home" aria-label="Übersicht"></section>
 
-      <h2 class="section-title" id="day-title">Heute</h2>
-      <div id="day-sets"></div>
+    <!-- KRAFT -->
+    <section class="view" id="view-kraft" aria-label="Krafttraining">
+      <form class="card log-card" id="k-form" autocomplete="off" novalidate>
+        <div class="card-head">
+          <h2>Satz eintragen</h2>
+          <label class="date-pill kraft" id="k-date-pill">
+            <svg class="i" aria-hidden="true"><use href="#i-cal"/></svg>
+            <span id="k-date-label">Heute</span>
+            <input type="date" id="k-date" aria-label="Datum des Trainings">
+          </label>
+        </div>
+        <div class="chips" id="k-chips" role="radiogroup" aria-label="Übung"></div>
+        <p class="last" id="k-last"></p>
+        <div class="steppers">
+          <div class="stepper-box">
+            <span class="lbl">Gewicht <small>kg</small></span>
+            <div class="stepper">
+              <button type="button" data-step="k-weight" data-delta="-2.5" aria-label="Gewicht verringern"><svg class="i" aria-hidden="true"><use href="#i-minus"/></svg></button>
+              <input id="k-weight" type="text" inputmode="decimal" placeholder="0" aria-label="Gewicht in Kilogramm">
+              <button type="button" data-step="k-weight" data-delta="2.5" aria-label="Gewicht erhöhen"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg></button>
+            </div>
+          </div>
+          <div class="stepper-box">
+            <span class="lbl">Wiederholungen</span>
+            <div class="stepper">
+              <button type="button" data-step="k-reps" data-delta="-1" aria-label="Wiederholungen verringern"><svg class="i" aria-hidden="true"><use href="#i-minus"/></svg></button>
+              <input id="k-reps" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" aria-label="Wiederholungen">
+              <button type="button" data-step="k-reps" data-delta="1" aria-label="Wiederholungen erhöhen"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-kraft" id="k-save"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Satz speichern</button>
+      </form>
+      <div id="k-day"></div>
+      <div id="k-list"></div>
     </section>
 
+    <!-- ÜBUNG (Detail) -->
+    <section class="view" id="view-uebung" aria-label="Übung"></section>
+
     <!-- LAUFEN -->
-    <section id="view-runs" class="view" aria-label="Läufe">
-      <form id="run-form" class="card" autocomplete="off">
-        <div class="row">
-          <label class="field grow">
-            <span>Distanz (km)</span>
-            <input type="text" id="run-dist" inputmode="decimal" placeholder="z. B. 5,2" required>
-          </label>
-          <label class="field">
-            <span>Datum</span>
-            <input type="date" id="run-date" required>
+    <section class="view" id="view-laufen" aria-label="Laufen">
+      <form class="card log-card" id="l-form" autocomplete="off" novalidate>
+        <div class="card-head">
+          <h2>Lauf eintragen</h2>
+          <label class="date-pill lauf" id="l-date-pill">
+            <svg class="i" aria-hidden="true"><use href="#i-cal"/></svg>
+            <span id="l-date-label">Heute</span>
+            <input type="date" id="l-date" aria-label="Datum des Laufs">
           </label>
         </div>
-        <div class="field" style="margin-top:10px">
-          <span>Zeit</span>
-          <div class="time-row">
-            <label><input type="number" id="run-h" inputmode="numeric" min="0" max="23" placeholder="0"><span>Std</span></label>
-            <label><input type="number" id="run-m" inputmode="numeric" min="0" max="59" placeholder="0"><span>Min</span></label>
-            <label><input type="number" id="run-s" inputmode="numeric" min="0" max="59" placeholder="0"><span>Sek</span></label>
+        <div class="run-grid">
+          <label class="field-box">
+            <span class="lbl">Distanz</span>
+            <span class="dist-input"><input id="l-dist" type="text" inputmode="decimal" placeholder="0,0" aria-label="Distanz in Kilometern"><span>km</span></span>
+          </label>
+          <div class="field-box">
+            <span class="lbl">Zeit</span>
+            <div class="time-row">
+              <label><input id="l-h" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" maxlength="2" aria-label="Stunden"><span>h</span></label>
+              <label><input id="l-m" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="00" maxlength="3" aria-label="Minuten"><span>min</span></label>
+              <label><input id="l-s" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="00" maxlength="2" aria-label="Sekunden"><span>s</span></label>
+            </div>
           </div>
         </div>
-        <p id="run-preview" class="hint">Pace wird automatisch berechnet</p>
-        <button type="submit" class="primary" style="margin-top:10px">Lauf speichern</button>
+        <div class="pace-preview" aria-live="polite">
+          <div><span class="lbl">Pace</span><b id="l-pace">–:––</b><small>min/km</small></div>
+          <div><span class="lbl">Tempo</span><b id="l-speed">–</b><small>km/h</small></div>
+        </div>
+        <button type="submit" class="btn btn-lauf"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Lauf speichern</button>
       </form>
-
-      <div class="tiles" id="run-tiles"></div>
-
-      <div class="card chart-card">
-        <div class="seg seg-top" id="run-metric" role="group" aria-label="Kennzahl">
-          <button data-metric="pace" class="on">Pace</button>
-          <button data-metric="distance">Distanz</button>
-          <button data-metric="speed">km/h</button>
-        </div>
-        <div id="run-chart" class="chart"></div>
-        <div id="run-tip" class="tip" hidden></div>
-        <div class="seg" id="run-range" role="group" aria-label="Zeitraum">
-          <button data-range="30">4 W</button>
-          <button data-range="90">3 M</button>
-          <button data-range="180">6 M</button>
-          <button data-range="365">1 J</button>
-          <button data-range="0" class="on">Alle</button>
-        </div>
-      </div>
-
-      <h2 class="section-title">Alle Läufe</h2>
-      <ul id="run-list" class="list card"></ul>
+      <div id="l-stats"></div>
     </section>
 
     <!-- VERLAUF -->
-    <section id="view-history" class="view" aria-label="Verlauf">
-      <div id="history-list"></div>
-    </section>
+    <section class="view" id="view-verlauf" aria-label="Verlauf"></section>
 
-    <!-- FORTSCHRITT -->
-    <section id="view-progress" class="view" aria-label="Fortschritt">
-      <div class="card">
-        <div class="row">
-          <label class="field grow">
-            <span>Übung</span>
-            <select id="prog-exercise"></select>
-          </label>
-          <label class="field grow">
-            <span>Kennzahl</span>
-            <select id="prog-metric">
-              <option value="max">Max. Gewicht</option>
-              <option value="e1rm">Geschätztes 1RM</option>
-              <option value="volume">Volumen (kg × Wdh)</option>
-              <option value="reps">Max. Wiederholungen</option>
-            </select>
-          </label>
-        </div>
-        <div class="seg" id="prog-range" role="group" aria-label="Zeitraum">
-          <button data-range="30">4 W</button>
-          <button data-range="90">3 M</button>
-          <button data-range="180">6 M</button>
-          <button data-range="365">1 J</button>
-          <button data-range="0" class="on">Alle</button>
-        </div>
-      </div>
-
-      <div class="tiles" id="prog-tiles"></div>
-
-      <div class="card chart-card">
-        <div id="chart" class="chart"></div>
-        <div id="chart-tip" class="tip" hidden></div>
-      </div>
-
-      <details class="card">
-        <summary>Werte als Tabelle</summary>
-        <div id="prog-table"></div>
-      </details>
-    </section>
-
-    <!-- ÜBUNGEN -->
-    <section id="view-exercises" class="view" aria-label="Übungen">
-      <form id="ex-form" class="card row" autocomplete="off">
-        <label class="field grow">
-          <span>Neue Übung</span>
-          <input type="text" id="ex-name" placeholder="z. B. Bankdrücken" required maxlength="60">
-        </label>
-        <button type="submit" class="primary self-end">Hinzufügen</button>
-      </form>
-      <ul id="ex-list" class="list card"></ul>
-
-      <div class="card">
-        <h2 class="section-title tight">Datensicherung</h2>
-        <p class="hint">Deine Daten liegen nur auf diesem Gerät im Browser. Exportiere sie regelmäßig.</p>
-        <div class="row">
-          <button type="button" id="btn-export" class="grow">Exportieren</button>
-          <label class="button grow">Importieren<input type="file" id="file-import" accept="application/json" hidden></label>
-        </div>
-      </div>
-    </section>
+    <!-- EINSTELLUNGEN -->
+    <section class="view" id="view-einstellungen" aria-label="Einstellungen"></section>
   </main>
 
   <nav class="tabbar" aria-label="Navigation">
-    <button data-view="log" class="on"><svg viewBox="0 0 24 24"><path d="M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12"/></svg>Training</button>
-    <button data-view="runs"><svg viewBox="0 0 24 24"><circle cx="14" cy="4.5" r="1.8"/><path d="M8 21l3-6 3 2v5M6 11l3-3h4l2 4 3 1M11 15l1-5"/></svg>Laufen</button>
-    <button data-view="history"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Verlauf</button>
-    <button data-view="progress"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 16l5-5 4 3 6-7"/></svg>Fortschritt</button>
-    <button data-view="exercises"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Übungen</button>
+    <a href="#/home" data-tab="home"><span class="pill"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg></span>Übersicht</a>
+    <a href="#/kraft" data-tab="kraft"><span class="pill"><svg class="i" aria-hidden="true"><use href="#i-dumbbell"/></svg></span>Kraft</a>
+    <a href="#/laufen" data-tab="laufen"><span class="pill"><svg class="i" aria-hidden="true"><use href="#i-run"/></svg></span>Laufen</a>
+    <a href="#/verlauf" data-tab="verlauf"><span class="pill"><svg class="i" aria-hidden="true"><use href="#i-cal"/></svg></span>Verlauf</a>
   </nav>
 
-  <div id="toast" class="toast" role="status" hidden></div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="app.js"></script>
 </body>
