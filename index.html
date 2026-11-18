@@ -37,7 +37,7 @@
             <span>Gewicht (kg)</span>
             <div class="stepper">
               <button type="button" data-step="weight" data-delta="-2.5" aria-label="Gewicht verringern">−</button>
-              <input type="number" id="log-weight" inputmode="decimal" step="0.25" min="0" required>
+              <input type="text" id="log-weight" inputmode="decimal" required>
               <button type="button" data-step="weight" data-delta="2.5" aria-label="Gewicht erhöhen">+</button>
             </div>
           </div>
@@ -55,6 +55,54 @@
 
       <h2 class="section-title" id="day-title">Heute</h2>
       <div id="day-sets"></div>
+    </section>
+
+    <!-- LAUFEN -->
+    <section id="view-runs" class="view" aria-label="Läufe">
+      <form id="run-form" class="card" autocomplete="off">
+        <div class="row">
+          <label class="field grow">
+            <span>Distanz (km)</span>
+            <input type="text" id="run-dist" inputmode="decimal" placeholder="z. B. 5,2" required>
+          </label>
+          <label class="field">
+            <span>Datum</span>
+            <input type="date" id="run-date" required>
+          </label>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <span>Zeit</span>
+          <div class="time-row">
+            <label><input type="number" id="run-h" inputmode="numeric" min="0" max="23" placeholder="0"><span>Std</span></label>
+            <label><input type="number" id="run-m" inputmode="numeric" min="0" max="59" placeholder="0"><span>Min</span></label>
+            <label><input type="number" id="run-s" inputmode="numeric" min="0" max="59" placeholder="0"><span>Sek</span></label>
+          </div>
+        </div>
+        <p id="run-preview" class="hint">Pace wird automatisch berechnet</p>
+        <button type="submit" class="primary" style="margin-top:10px">Lauf speichern</button>
+      </form>
+
+      <div class="tiles" id="run-tiles"></div>
+
+      <div class="card chart-card">
+        <div class="seg seg-top" id="run-metric" role="group" aria-label="Kennzahl">
+          <button data-metric="pace" class="on">Pace</button>
+          <button data-metric="distance">Distanz</button>
+          <button data-metric="speed">km/h</button>
+        </div>
+        <div id="run-chart" class="chart"></div>
+        <div id="run-tip" class="tip" hidden></div>
+        <div class="seg" id="run-range" role="group" aria-label="Zeitraum">
+          <button data-range="30">4 W</button>
+          <button data-range="90">3 M</button>
+          <button data-range="180">6 M</button>
+          <button data-range="365">1 J</button>
+          <button data-range="0" class="on">Alle</button>
+        </div>
+      </div>
+
+      <h2 class="section-title">Alle Läufe</h2>
+      <ul id="run-list" class="list card"></ul>
     </section>
 
     <!-- VERLAUF -->
@@ -126,6 +174,7 @@
 
   <nav class="tabbar" aria-label="Navigation">
     <button data-view="log" class="on"><svg viewBox="0 0 24 24"><path d="M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12"/></svg>Training</button>
+    <button data-view="runs"><svg viewBox="0 0 24 24"><circle cx="14" cy="4.5" r="1.8"/><path d="M8 21l3-6 3 2v5M6 11l3-3h4l2 4 3 1M11 15l1-5"/></svg>Laufen</button>
     <button data-view="history"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Verlauf</button>
     <button data-view="progress"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 16l5-5 4 3 6-7"/></svg>Fortschritt</button>
     <button data-view="exercises"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Übungen</button>

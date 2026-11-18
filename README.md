@@ -4,7 +4,8 @@ Eine einfache Web-App (PWA) zum Tracken von Kraftübungen mit Gewicht und Wieder
 
 ## Funktionen
 - **Training**: Übung wählen, Gewicht & Wiederholungen eingeben (mit +/- Tasten), Satz speichern. Werte vom letzten Satz werden vorausgefüllt, das letzte Training der Übung wird angezeigt. Neue Bestleistungen werden gemeldet.
-- **Verlauf**: Alle Trainingstage mit Übungen und Sätzen; vergangene Tage lassen sich bearbeiten.
+- **Laufen**: Läufe mit Distanz und Zeit erfassen, Pace (min/km) und km/h werden automatisch berechnet. Diagramm für Pace, Distanz oder Geschwindigkeit, Kennzahlen Gesamt-km, beste Pace, längster Lauf.
+- **Verlauf**: Alle Trainingstage (Kraft und Läufe) mit Übungen und Sätzen; vergangene Tage lassen sich bearbeiten.
 - **Fortschritt**: Liniendiagramm pro Übung über die Zeit – Max. Gewicht, geschätztes 1RM (Epley), Volumen oder Max. Wiederholungen; Zeitraum 4 Wochen bis alles. Kennzahlen: Bestwert, Entwicklung in %, Anzahl Einheiten. Tabellenansicht.
 - **Übungen**: Übungen anlegen, umbenennen, löschen. Export/Import der Daten als JSON.
 - Dark Mode, offline-fähig, auf dem Handy zum Startbildschirm hinzufügbar.

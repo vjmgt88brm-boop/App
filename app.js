@@ -11,10 +11,10 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const d = JSON.parse(raw);
-      if (Array.isArray(d.exercises) && Array.isArray(d.sets)) return d;
+      if (Array.isArray(d.exercises) && Array.isArray(d.sets)) { if (!Array.isArray(d.runs)) d.runs = []; return d; }
     }
   } catch (_) { /* ignore */ }
-  return { exercises: DEFAULT_EXERCISES.map(name => ({ id: uid(), name })), sets: [] };
+  return { exercises: DEFAULT_EXERCISES.map(name => ({ id: uid(), name })), sets: [], runs: [] };
 }
 let db = load();
 function save() {
@@ -68,7 +68,7 @@ function toast(msg, action) {
 }
 
 /* ---------- Navigation ---------- */
-const TITLES = { log: 'Training', history: 'Verlauf', progress: 'Fortschritt', exercises: 'Übungen' };
+const TITLES = { log: 'Training', runs: 'Laufen', history: 'Verlauf', progress: 'Fortschritt', exercises: 'Übungen' };
 let currentView = 'log';
 function show(view) {
   currentView = view;
@@ -100,7 +100,7 @@ function lastSessionBefore(exId, date) {
 function prefill() {
   const exId = logEx.value;
   const mine = db.sets.filter(s => s.exerciseId === exId).sort((a, b) => b.ts - a.ts);
-  if (mine.length) { logW.value = mine[0].weight; logR.value = mine[0].reps; }
+  if (mine.length) { logW.value = String(mine[0].weight).replace('.', ','); logR.value = mine[0].reps; }
   else { logW.value = ''; logR.value = ''; }
   updateHint();
 }
@@ -114,8 +114,8 @@ logDate.addEventListener('change', () => { updateHint(); renderDay(); });
 document.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', () => {
   const inp = b.dataset.step === 'weight' ? logW : logR;
   const min = b.dataset.step === 'weight' ? 0 : 1;
-  const v = Math.max(min, (parseFloat(inp.value) || 0) + parseFloat(b.dataset.delta));
-  inp.value = Math.round(v * 100) / 100;
+  const v = Math.max(min, (parseFloat(String(inp.value).replace(',', '.')) || 0) + parseFloat(b.dataset.delta));
+  inp.value = String(Math.round(v * 100) / 100).replace('.', ',');
 }));
 
 $('#log-form').addEventListener('submit', e => {
@@ -168,13 +168,16 @@ function renderDay() {
 /* ---------- Verlauf ---------- */
 function renderHistory() {
   const el = $('#history-list');
-  if (!db.sets.length) { el.innerHTML = '<div class="card empty">Noch keine Trainings erfasst.</div>'; return; }
-  const byDate = [...groupBy(db.sets, s => s.date)].sort((a, b) => b[0].localeCompare(a[0]));
-  el.innerHTML = byDate.map(([date, sets]) => {
+  if (!db.sets.length && !db.runs.length) { el.innerHTML = '<div class="card empty">Noch keine Trainings erfasst.</div>'; return; }
+  const dates = [...new Set([...db.sets.map(s => s.date), ...db.runs.map(r => r.date)])].sort().reverse();
+  el.innerHTML = dates.map(date => {
+    const sets = db.sets.filter(s => s.date === date);
+    const runs = db.runs.filter(r => r.date === date).sort((a, b) => a.ts - b.ts);
     const exs = [...groupBy(sets.sort((a, b) => a.ts - b.ts), s => s.exerciseId)];
     return `<div class="card day"><h2>${esc(dateLong(date))}</h2>` +
+      runs.map(r => `<div class="ex"><strong>🏃 Lauf</strong><span>${esc(runLabel(r))}</span></div>`).join('') +
       exs.map(([id, ss]) => `<div class="ex"><strong>${esc(exName(id))}</strong><span>${esc(setsLabel(ss))}</span></div>`).join('') +
-      `<button type="button" class="link" data-goto="${date}">Bearbeiten ›</button></div>`;
+      (sets.length ? `<button type="button" class="link" data-goto="${date}">Bearbeiten ›</button>` : '') + '</div>';
   }).join('');
 }
 $('#history-list').addEventListener('click', e => {
@@ -242,7 +245,7 @@ function renderProgress() {
 }
 
 function niceTicks(min, max, count = 4) {
-  if (min === max) { min -= 1; max += 1; }
+  if (min === max) { const d = Math.abs(min) * 0.1 || 1; min -= d; max += d; }
   const span = max - min;
   const raw = span / count;
   const mag = Math.pow(10, Math.floor(Math.log10(raw)));
@@ -253,8 +256,8 @@ function niceTicks(min, max, count = 4) {
   return ticks;
 }
 
-function drawChart(pts, m) {
-  const el = $('#chart'), tip = $('#chart-tip');
+function drawChart(pts, m, el = $('#chart'), tip = $('#chart-tip')) {
+  const vf = m.format || fmt;
   const W = el.clientWidth || 320, H = el.clientHeight || 260;
   const pad = { l: 40, r: 14, t: 14, b: 26 };
   const t0 = new Date(pts[0].date).getTime();
@@ -263,11 +266,12 @@ function drawChart(pts, m) {
   const ticks = niceTicks(Math.min(...vals), Math.max(...vals));
   const yMin = ticks[0], yMax = ticks[ticks.length - 1];
   const x = d => pts.length === 1 ? (pad.l + W - pad.r) / 2 : pad.l + (new Date(d).getTime() - t0) / (t1 - t0) * (W - pad.l - pad.r);
-  const y = v => pad.t + (1 - (v - yMin) / (yMax - yMin)) * (H - pad.t - pad.b);
+  const y = v => { const f = (v - yMin) / (yMax - yMin); return pad.t + (m.invert ? f : 1 - f) * (H - pad.t - pad.b); };
 
   // running best -> mark PR sessions
+  const sign = m.lowerBetter ? -1 : 1;
   let run = -Infinity;
-  const pr = pts.map(p => { const is = p.value > run; if (is) run = p.value; return is; });
+  const pr = pts.map(p => { const v = sign * p.value; const is = v > run; if (is) run = v; return is; });
 
   const xy = pts.map(p => [x(p.date), y(p.value)]);
   const line = xy.map((c, i) => (i ? 'L' : 'M') + c[0].toFixed(1) + ',' + c[1].toFixed(1)).join('');
@@ -280,7 +284,7 @@ function drawChart(pts, m) {
   const showDots = pts.length <= 60;
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(m.label)} über die Zeit">
     <g class="grid">${ticks.map(t => `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(t)}" y2="${y(t)}"/>`).join('')}</g>
-    <g class="axis">${ticks.map(t => `<text x="${pad.l - 6}" y="${y(t) + 4}" text-anchor="end">${fmt(t)}</text>`).join('')}
+    <g class="axis">${ticks.map(t => `<text x="${pad.l - 6}" y="${y(t) + 4}" text-anchor="end">${vf(t)}</text>`).join('')}
       ${xIdx.map(i => `<text x="${xy[i][0]}" y="${H - 6}" text-anchor="${pts.length === 1 ? 'middle' : i === 0 ? 'start' : i === pts.length - 1 ? 'end' : 'middle'}">${dateShort(pts[i].date)}</text>`).join('')}</g>
     ${area ? `<path class="area" d="${area}"/>` : ''}
     <path class="line" d="${line}"/>
@@ -300,7 +304,7 @@ function drawChart(pts, m) {
     const [cx, cy] = xy[bi], p = pts[bi];
     cross.setAttribute('x1', cx); cross.setAttribute('x2', cx); cross.setAttribute('visibility', 'visible');
     focus.setAttribute('cx', cx); focus.setAttribute('cy', cy); focus.setAttribute('visibility', 'visible');
-    tip.innerHTML = `${esc(dateMed(p.date))}${pr[bi] && bi > 0 ? ' · 🏆' : ''}<br><b>${fmt(p.value)} ${m.unit}</b><br>${esc(setsLabel(p.sets))}`;
+    tip.innerHTML = `${esc(dateMed(p.date))}${pr[bi] && bi > 0 ? ' · 🏆' : ''}<br><b>${vf(p.value)} ${m.unit}</b><br>${esc(p.detail ?? setsLabel(p.sets))}`;
     tip.hidden = false;
     const cardR = el.parentElement.getBoundingClientRect();
     let left = r.left - cardR.left + cx * (r.width / W);
@@ -313,7 +317,103 @@ function drawChart(pts, m) {
   svg.addEventListener('pointerdown', move);
   svg.addEventListener('pointerleave', hide);
 }
-window.addEventListener('resize', () => { if (currentView === 'progress') renderProgress(); });
+window.addEventListener('resize', () => { if (currentView === 'progress') renderProgress(); if (currentView === 'runs') renderRuns(); });
+
+/* ---------- Laufen ---------- */
+const runDate = $('#run-date'), runDist = $('#run-dist'), runH = $('#run-h'), runM = $('#run-m'), runS = $('#run-s');
+runDate.value = todayISO();
+let runRange = 0, runMetric = 'pace';
+
+const pad2 = n => String(n).padStart(2, '0');
+function fmtDuration(sec) {
+  sec = Math.round(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  return h ? `${h}:${pad2(m)}:${pad2(s)} h` : `${m}:${pad2(s)} min`;
+}
+const fmtPace = secPerKm => { const t = Math.round(secPerKm); return `${Math.floor(t / 60)}:${pad2(t % 60)}`; };
+const runPace = r => r.seconds / r.distance;          // Sekunden pro km
+const runSpeed = r => r.distance / (r.seconds / 3600); // km/h
+const runLabel = r => `${fmt(r.distance)} km in ${fmtDuration(r.seconds)} · ${fmtPace(runPace(r))} min/km`;
+
+function readRunForm() {
+  const distance = parseFloat(String(runDist.value).replace(',', '.'));
+  const seconds = (parseInt(runH.value, 10) || 0) * 3600 + (parseInt(runM.value, 10) || 0) * 60 + (parseInt(runS.value, 10) || 0);
+  return { distance, seconds };
+}
+function updateRunPreview() {
+  const { distance, seconds } = readRunForm();
+  $('#run-preview').innerHTML = distance > 0 && seconds > 0
+    ? `Pace <b>${fmtPace(seconds / distance)} min/km</b> · ${fmt(Math.round(distance / (seconds / 3600) * 10) / 10)} km/h`
+    : 'Pace wird automatisch berechnet';
+}
+[runDist, runH, runM, runS].forEach(i => i.addEventListener('input', updateRunPreview));
+
+$('#run-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const { distance, seconds } = readRunForm();
+  if (!(distance > 0) || !(seconds > 0)) { toast('Bitte Distanz und Zeit angeben.'); return; }
+  const prevBest = db.runs.length ? Math.min(...db.runs.map(runPace)) : null;
+  db.runs.push({ id: uid(), date: runDate.value || todayISO(), distance, seconds, ts: Date.now() });
+  save();
+  [runDist, runH, runM, runS].forEach(i => { i.value = ''; });
+  updateRunPreview();
+  renderRuns();
+  toast(prevBest !== null && seconds / distance < prevBest ? '🏆 Schnellste Pace bisher!' : 'Lauf gespeichert');
+});
+
+const RUN_METRIC = {
+  pace: { label: 'Pace', unit: 'min/km', format: fmtPace, lowerBetter: true, invert: true, fn: runPace },
+  distance: { label: 'Distanz', unit: 'km', fn: r => r.distance },
+  speed: { label: 'Geschwindigkeit', unit: 'km/h', fn: r => Math.round(runSpeed(r) * 10) / 10 },
+};
+$('#run-metric').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  runMetric = b.dataset.metric;
+  document.querySelectorAll('#run-metric button').forEach(x => x.classList.toggle('on', x === b));
+  renderRuns();
+});
+$('#run-range').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  runRange = +b.dataset.range;
+  document.querySelectorAll('#run-range button').forEach(x => x.classList.toggle('on', x === b));
+  renderRuns();
+});
+$('#run-list').addEventListener('click', e => {
+  const b = e.target.closest('[data-delrun]'); if (!b) return;
+  const idx = db.runs.findIndex(r => r.id === b.dataset.delrun); if (idx < 0) return;
+  const [removed] = db.runs.splice(idx, 1);
+  save(); renderRuns();
+  toast('Lauf gelöscht', { label: 'Rückgängig', fn: () => { db.runs.push(removed); save(); render(); } });
+});
+
+function renderRuns() {
+  let runs = [...db.runs].sort((a, b) => a.date.localeCompare(b.date) || a.ts - b.ts);
+  if (runRange) {
+    const from = new Date(); from.setDate(from.getDate() - runRange);
+    const iso = from.toISOString().slice(0, 10);
+    runs = runs.filter(r => r.date >= iso);
+  }
+  const m = RUN_METRIC[runMetric];
+  const tiles = $('#run-tiles');
+  if (!runs.length) {
+    tiles.innerHTML = '';
+    $('#run-chart').innerHTML = '<div class="empty">Noch keine Läufe im gewählten Zeitraum.</div>';
+  } else {
+    const total = runs.reduce((a, r) => a + r.distance, 0);
+    tiles.innerHTML = `
+      <div class="tile"><div class="k">Gesamt</div><div class="v">${fmt(total >= 100 ? Math.round(total) : Math.round(total * 10) / 10)} <small>km</small></div></div>
+      <div class="tile"><div class="k">Beste Pace</div><div class="v">${fmtPace(Math.min(...runs.map(runPace)))}</div></div>
+      <div class="tile"><div class="k">Längster</div><div class="v">${fmt(Math.max(...runs.map(r => r.distance)))} <small>km</small></div></div>`;
+    const pts = runs.map(r => ({ date: r.date, value: m.fn(r), detail: runLabel(r) }));
+    drawChart(pts, m, $('#run-chart'), $('#run-tip'));
+  }
+  const all = [...db.runs].sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts);
+  $('#run-list').innerHTML = all.length ? all.map(r => `<li>
+      <span class="name"><b>${fmt(r.distance)} km</b> · ${fmtDuration(r.seconds)}<br>
+      <span class="meta">${esc(dateMed(r.date))} · ${fmtPace(runPace(r))} min/km · ${fmt(Math.round(runSpeed(r) * 10) / 10)} km/h</span></span>
+      <button type="button" class="ghost" data-delrun="${r.id}" aria-label="Lauf löschen">✕</button></li>`).join('')
+    : '<li class="empty">Noch keine Läufe erfasst.</li>';
+}
 
 /* ---------- Übungen ---------- */
 $('#ex-form').addEventListener('submit', e => {
@@ -370,7 +470,8 @@ $('#file-import').addEventListener('change', async e => {
   try {
     const d = JSON.parse(await file.text());
     if (!Array.isArray(d.exercises) || !Array.isArray(d.sets)) throw new Error();
-    if (!confirm(`Import: ${d.exercises.length} Übungen, ${d.sets.length} Sätze.\nAktuelle Daten werden ersetzt. Fortfahren?`)) return;
+    if (!Array.isArray(d.runs)) d.runs = [];
+    if (!confirm(`Import: ${d.exercises.length} Übungen, ${d.sets.length} Sätze, ${d.runs.length} Läufe.\nAktuelle Daten werden ersetzt. Fortfahren?`)) return;
     db = d; save(); render(); toast('Import erfolgreich');
   } catch (_) { toast('Datei konnte nicht gelesen werden.'); }
 });
@@ -390,6 +491,7 @@ function render() {
   if (currentView === 'history') renderHistory();
   if (currentView === 'progress') renderProgress();
   if (currentView === 'exercises') renderExercises();
+  if (currentView === 'runs') renderRuns();
 }
 
 render();
