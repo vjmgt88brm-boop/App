@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2a78d6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Trainingslog">
+  <title>Trainingslog</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 id="view-title">Training</h1>
+  </header>
+
+  <main>
+    <!-- TRAINING -->
+    <section id="view-log" class="view active" aria-label="Training erfassen">
+      <form id="log-form" class="card" autocomplete="off">
+        <div class="row">
+          <label class="field grow">
+            <span>Übung</span>
+            <select id="log-exercise" required></select>
+          </label>
+          <label class="field">
+            <span>Datum</span>
+            <input type="date" id="log-date" required>
+          </label>
+        </div>
+        <p id="log-hint" class="hint"></p>
+        <div class="row">
+          <div class="field grow">
+            <span>Gewicht (kg)</span>
+            <div class="stepper">
+              <button type="button" data-step="weight" data-delta="-2.5" aria-label="Gewicht verringern">−</button>
+              <input type="number" id="log-weight" inputmode="decimal" step="0.25" min="0" required>
+              <button type="button" data-step="weight" data-delta="2.5" aria-label="Gewicht erhöhen">+</button>
+            </div>
+          </div>
+          <div class="field grow">
+            <span>Wiederholungen</span>
+            <div class="stepper">
+              <button type="button" data-step="reps" data-delta="-1" aria-label="Wiederholungen verringern">−</button>
+              <input type="number" id="log-reps" inputmode="numeric" step="1" min="1" required>
+              <button type="button" data-step="reps" data-delta="1" aria-label="Wiederholungen erhöhen">+</button>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="primary">Satz speichern</button>
+      </form>
+
+      <h2 class="section-title" id="day-title">Heute</h2>
+      <div id="day-sets"></div>
+    </section>
+
+    <!-- VERLAUF -->
+    <section id="view-history" class="view" aria-label="Verlauf">
+      <div id="history-list"></div>
+    </section>
+
+    <!-- FORTSCHRITT -->
+    <section id="view-progress" class="view" aria-label="Fortschritt">
+      <div class="card">
+        <div class="row">
+          <label class="field grow">
+            <span>Übung</span>
+            <select id="prog-exercise"></select>
+          </label>
+          <label class="field grow">
+            <span>Kennzahl</span>
+            <select id="prog-metric">
+              <option value="max">Max. Gewicht</option>
+              <option value="e1rm">Geschätztes 1RM</option>
+              <option value="volume">Volumen (kg × Wdh)</option>
+              <option value="reps">Max. Wiederholungen</option>
+            </select>
+          </label>
+        </div>
+        <div class="seg" id="prog-range" role="group" aria-label="Zeitraum">
+          <button data-range="30">4 W</button>
+          <button data-range="90">3 M</button>
+          <button data-range="180">6 M</button>
+          <button data-range="365">1 J</button>
+          <button data-range="0" class="on">Alle</button>
+        </div>
+      </div>
+
+      <div class="tiles" id="prog-tiles"></div>
+
+      <div class="card chart-card">
+        <div id="chart" class="chart"></div>
+        <div id="chart-tip" class="tip" hidden></div>
+      </div>
+
+      <details class="card">
+        <summary>Werte als Tabelle</summary>
+        <div id="prog-table"></div>
+      </details>
+    </section>
+
+    <!-- ÜBUNGEN -->
+    <section id="view-exercises" class="view" aria-label="Übungen">
+      <form id="ex-form" class="card row" autocomplete="off">
+        <label class="field grow">
+          <span>Neue Übung</span>
+          <input type="text" id="ex-name" placeholder="z. B. Bankdrücken" required maxlength="60">
+        </label>
+        <button type="submit" class="primary self-end">Hinzufügen</button>
+      </form>
+      <ul id="ex-list" class="list card"></ul>
+
+      <div class="card">
+        <h2 class="section-title tight">Datensicherung</h2>
+        <p class="hint">Deine Daten liegen nur auf diesem Gerät im Browser. Exportiere sie regelmäßig.</p>
+        <div class="row">
+          <button type="button" id="btn-export" class="grow">Exportieren</button>
+          <label class="button grow">Importieren<input type="file" id="file-import" accept="application/json" hidden></label>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Navigation">
+    <button data-view="log" class="on"><svg viewBox="0 0 24 24"><path d="M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12"/></svg>Training</button>
+    <button data-view="history"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Verlauf</button>
+    <button data-view="progress"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 16l5-5 4 3 6-7"/></svg>Fortschritt</button>
+    <button data-view="exercises"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Übungen</button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
